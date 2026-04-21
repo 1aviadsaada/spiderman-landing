@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דאשבורד תקציב קריית גת | 2020–2023</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#2563eb;--primary-dk:#1d4ed8;--primary-lt:#eff6ff;
+  --violet:#7c3aed;--violet-lt:#f5f3ff;
+  --green:#059669;--green-lt:#ecfdf5;
+  --red:#dc2626;--red-lt:#fef2f2;
+  --amber:#d97706;--amber-lt:#fffbeb;
+  --bg:#f1f5f9;--card:#fff;--border:#e2e8f0;
+  --text:#0f172a;--muted:#64748b;--subtle:#94a3b8;
+  --radius:14px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08);
+}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl}
+
+/* ── Header ── */
+.header{
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 45%,#7c3aed 100%);
+  color:#fff;padding:2rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden
+}
+.header::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+}
+.header-inner{position:relative}
+.header h1{font-size:clamp(1.5rem,4vw,2.25rem);font-weight:900;letter-spacing:-.02em;margin-bottom:.5rem}
+.header p{opacity:.75;font-size:.95rem;font-weight:400}
+.header-badges{display:flex;gap:.5rem;justify-content:center;margin-top:1rem;flex-wrap:wrap}
+.hbadge{
+  display:inline-flex;align-items:center;gap:.35rem;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;padding:.3rem .75rem;font-size:.78rem;font-weight:600
+}
+
+/* ── Layout ── */
+.container{max-width:1440px;margin:0 auto;padding:1.5rem}
+
+/* ── Controls ── */
+.controls{
+  background:var(--card);border-radius:var(--radius);
+  padding:1.25rem 1.5rem;box-shadow:var(--shadow);
+  margin-bottom:1.25rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end
+}
+.ctrl-group{display:flex;flex-direction:column;gap:.4rem;flex:1;min-width:140px}
+.ctrl-group label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ctrl-group select,.ctrl-group input{
+  padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-family:'Heebo',sans-serif;font-size:.9rem;color:var(--text);background:#fff;
+  transition:border-color .15s,box-shadow .15s;direction:rtl;cursor:pointer
+}
+.ctrl-group select:focus,.ctrl-group input:focus{
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)
+}
+.year-tabs{display:flex;gap:.4rem;flex-wrap:wrap}
+.ytab{
+  padding:.5rem 1.1rem;border:2px solid var(--border);border-radius:var(--radius-sm);
+  cursor:pointer;font-family:'Heebo',sans-serif;font-size:.9rem;font-weight:700;
+  background:#fff;color:var(--muted);transition:all .15s;white-space:nowrap
+}
+.ytab:hover{border-color:var(--primary);color:var(--primary)}
+.ytab.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+
+/* ── Status bar ── */
+.status-bar{
+  display:flex;align-items:center;gap:.6rem;font-size:.8rem;
+  color:var(--muted);margin-bottom:1.25rem;padding:.5rem 0
+}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.sdot.busy{background:var(--amber);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── KPI cards ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:1.25rem}
+.kpi-card{
+  background:var(--card);border-radius:var(--radius);padding:1.25rem 1.5rem;
+  box-shadow:var(--shadow);border-top:3px solid transparent;position:relative;overflow:hidden
+}
+.kpi-card::after{
+  content:'';position:absolute;top:-10px;left:-10px;
+  width:70px;height:70px;border-radius:50%;opacity:.06
+}
+.kpi-card.blue{border-top-color:var(--primary)}.kpi-card.blue::after{background:var(--primary)}
+.kpi-card.green{border-top-color:var(--green)}.kpi-card.green::after{background:var(--green)}
+.kpi-card.red{border-top-color:var(--red)}.kpi-card.red::after{background:var(--red)}
+.kpi-card.amber{border-top-color:var(--amber)}.kpi-card.amber::after{background:var(--amber)}
+.kpi-label{font-size:.78rem;color:var(--muted);font-weight:600;margin-bottom:.5rem}
+.kpi-val{font-size:1.65rem;font-weight:800;color:var(--text);letter-spacing:-.02em;line-height:1}
+.kpi-val.green{color:var(--green)}.kpi-val.red{color:var(--red)}
+.kpi-sub{font-size:.72rem;color:var(--subtle);margin-top:.4rem}
+
+/* ── Charts grid ── */
+.charts-grid{display:grid;grid-template-columns:3fr 2fr;gap:1.25rem;margin-bottom:1.25rem}
+@media(max-width:900px){.charts-grid{grid-template-columns:1fr}}
+
+/* ── Card ── */
+.card{background:var(--card);border-radius:var(--radius);padding:1.5rem;box-shadow:var(--shadow)}
+.card-title{
+  font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:1.25rem;
+  display:flex;align-items:center;gap:.5rem;flex-wrap:wrap
+}
+.badge{
+  font-size:.68rem;font-weight:700;padding:.2rem .55rem;border-radius:4px;
+  background:var(--primary-lt);color:var(--primary)
+}
+.badge.violet{background:var(--violet-lt);color:var(--violet)}
+
+/* ── Trend selector ── */
+.trend-selector{
+  display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;
+  max-height:80px;overflow-y:auto;
+}
+.trend-selector::-webkit-scrollbar{width:4px}
+.trend-selector::-webkit-scrollbar-track{background:transparent}
+.trend-selector::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.tbtn{
+  padding:.28rem .65rem;border:1.5px solid var(--border);border-radius:5px;
+  cursor:pointer;font-family:'Heebo',sans-serif;font-size:.75rem;font-weight:600;
+  background:#fff;color:var(--muted);transition:all .15s;white-space:nowrap
+}
+.tbtn:hover{border-color:var(--violet);color:var(--violet)}
+.tbtn.active{background:var(--violet);border-color:var(--violet);color:#fff}
+.trend-hint{font-size:.72rem;color:var(--muted);align-self:center;flex-shrink:0;white-space:nowrap}
+
+/* ── Table ── */
+.table-wrapper{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{
+  background:#f8fafc;padding:.7rem 1rem;text-align:right;
+  font-weight:700;color:var(--muted);font-size:.72rem;
+  text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;
+  border-bottom:2px solid var(--border)
+}
+thead th:last-child{text-align:left}
+tbody td{padding:.6rem 1rem;border-bottom:1px solid #f1f5f9;color:var(--text)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#fafbff}
+.val-pos{color:var(--green);font-weight:700;font-variant-numeric:tabular-nums}
+.val-neg{color:var(--red);font-weight:700;font-variant-numeric:tabular-nums}
+.val-num{font-variant-numeric:tabular-nums}
+
+/* ── Pagination ── */
+.pagination{display:flex;gap:.4rem;align-items:center;justify-content:center;margin-top:1rem;flex-wrap:wrap}
+.pbtn{
+  padding:.35rem .7rem;border:1.5px solid var(--border);border-radius:5px;cursor:pointer;
+  font-family:'Heebo',sans-serif;font-size:.8rem;background:#fff;transition:all .15s
+}
+.pbtn:hover{border-color:var(--primary);color:var(--primary)}
+.pbtn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.pinfo{font-size:.78rem;color:var(--muted);padding:0 .25rem}
+
+/* ── Loading ── */
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:1rem;color:var(--muted)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.no-data{text-align:center;padding:2rem;color:var(--muted);font-size:.9rem}
+
+/* ── Highlights ── */
+.highlights{
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 60%,#312e81 100%);
+  border-radius:var(--radius);padding:1.75rem;color:#fff;margin-bottom:1.25rem
+}
+.hl-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.hl-title{font-size:1.05rem;font-weight:800}
+.hl-tag{
+  font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)
+}
+.hl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:.85rem}
+.hl-item{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:1rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start;
+  transition:background .2s
+}
+.hl-item:hover{background:rgba(255,255,255,.11)}
+.hl-icon{font-size:1.4rem;flex-shrink:0;line-height:1.3}
+.hl-text strong{display:block;font-size:.85rem;font-weight:700;color:#93c5fd;margin-bottom:.3rem}
+.hl-text p{font-size:.78rem;opacity:.78;line-height:1.55}
+.hl-item.dynamic{border-color:rgba(167,139,250,.3);background:rgba(124,58,237,.12)}
+.hl-item.dynamic .hl-text strong{color:#c4b5fd}
+
+/* ── Export bar ── */
+.export-bar{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.export-btn{
+  padding:.5rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  cursor:pointer;font-family:'Heebo',sans-serif;font-size:.82rem;font-weight:600;
+  background:#fff;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:.4rem
+}
+.export-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-lt)}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .container{padding:1rem}
+  .controls{padding:1rem}
+  .kpi-val{font-size:1.35rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-inner">
+    <h1>🏙️ דאשבורד תקציב — קריית גת</h1>
+    <p>דוחות כספיים מבוקרים שנתיים | מקור: data.gov.il — משרד הפנים</p>
+    <div class="header-badges">
+      <span class="hbadge">📅 2020–2023</span>
+      <span class="hbadge">🔢 קוד רשות: 2789</span>
+      <span class="hbadge">💰 יחידות: אלפי ₪</span>
+      <span class="hbadge">✅ דוחות מבוקרים</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="ctrl-group">
+      <label>שנת דוח</label>
+      <div class="year-tabs">
+        <button class="ytab active" data-year="2020">2020</button>
+        <button class="ytab" data-year="2021">2021</button>
+        <button class="ytab" data-year="2022">2022</button>
+        <button class="ytab" data-year="2023">2023</button>
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <label>גיליון / טופס</label>
+      <select id="sheetSel">
+        <option value="">כל הגיליונות</option>
+      </select>
+    </div>
+    <div class="ctrl-group">
+      <label>תקופה</label>
+      <select id="colSel">
+        <option value="">הכל</option>
+        <option value="שנה נוכחית">שנה נוכחית</option>
+        <option value="שנה קודמת">שנה קודמת</option>
+      </select>
+    </div>
+    <div class="ctrl-group" style="flex:2;min-width:220px">
+      <label>🔍 חיפוש סעיף</label>
+      <input type="text" id="searchIn" placeholder="הקלד שם סעיף לחיפוש..." autocomplete="off">
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar">
+    <div class="sdot busy" id="sdot"></div>
+    <span id="stext">מאתחל...</span>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="kpi-label">סה"כ רשומות מסוננות</div>
+      <div class="kpi-val" id="kTotal">—</div>
+      <div class="kpi-sub">לאחר סינון</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">סה"כ ערכים חיוביים</div>
+      <div class="kpi-val green" id="kPos">—</div>
+      <div class="kpi-sub">באלפי ₪</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">סה"כ ערכים שליליים</div>
+      <div class="kpi-val red" id="kNeg">—</div>
+      <div class="kpi-sub">באלפי ₪</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">מאזן נטו</div>
+      <div class="kpi-val" id="kNet">—</div>
+      <div class="kpi-sub">אלפי ₪ | שנה נוכחית</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">מספר סעיפים ייחודיים</div>
+      <div class="kpi-val" id="kUniq">—</div>
+      <div class="kpi-sub">שורות שונות</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-title">
+        📊 טופ 15 סעיפים לפי ערך מוחלט
+        <span class="badge" id="barYearBadge">2020</span>
+        <span class="badge" style="background:#f0fdf4;color:#166534" id="barColBadge">שנה נוכחית</span>
+      </div>
+      <div style="position:relative;height:380px">
+        <canvas id="barC"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        📈 מגמה רב-שנתית (2020–2023)
+        <span class="badge violet">בחר עד 4 סעיפים</span>
+      </div>
+      <div class="trend-selector" id="trendSel">
+        <span class="trend-hint">טוען...</span>
+      </div>
+      <div style="position:relative;height:290px">
+        <canvas id="lineC"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-title">
+      📋 טבלת נתונים מלאה
+      <span class="badge" id="tblBadge">— רשומות</span>
+    </div>
+    <div class="export-bar">
+      <button class="export-btn" onclick="exportCSV()">⬇️ ייצוא CSV</button>
+      <button class="export-btn" onclick="copyAPIUrl()">📋 העתק API URL</button>
+    </div>
+    <div style="margin-top:1rem">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>גיליון</th>
+              <th>שורה / סעיף</th>
+              <th>עמודה</th>
+              <th style="text-align:left">ערך (אלפי ₪)</th>
+            </tr>
+          </thead>
+          <tbody id="tBody">
+            <tr><td colspan="4"><div class="loading-state"><div class="spinner"></div><span>טוען...</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pgn"></div>
+    </div>
+  </div>
+
+  <!-- Highlights -->
+  <div class="highlights">
+    <div class="hl-header">
+      <span style="font-size:1.5rem">💡</span>
+      <span class="hl-title">היילייטס ודגשים חשובים</span>
+      <span class="hl-tag">עדכון אוטומטי עם הנתונים</span>
+    </div>
+    <div class="hl-grid">
+
+      <!-- Static highlights -->
+      <div class="hl-item">
+        <div class="hl-icon">⚠️</div>
+        <div class="hl-text">
+          <strong>נתוני 2024 טרם פורסמו</strong>
+          <p>הדוחות הכספיים המבוקרים מפורסמים בפיגור של 18–24 חודשים. נתוני 2024 צפויים להתפרסם לקראת סוף 2025 או תחילת 2026.</p>
+        </div>
+      </div>
+
+      <div class="hl-item">
+        <div class="hl-icon">🔄</div>
+        <div class="hl-text">
+          <strong>שינוי קוד רשות בין שנים</strong>
+          <p>ב-2020–2022 קריית גת מזוהה בקוד <code style="background:rgba(255,255,255,.15);padding:0 .3rem;border-radius:3px">2789</code>. בדאטאסט 2023 מזוהה בקוד <code style="background:rgba(255,255,255,.15);padding:0 .3rem;border-radius:3px">32630</code>. שינוי זה עלול לגרום לשגיאות בהשוואות אוטומטיות.</p>
+        </div>
+      </div>
+
+      <div class="hl-item">
+        <div class="hl-icon">📦</div>
+        <div class="hl-text">
+          <strong>שני דאטאסטים — עקביות חלקית בלבד</strong>
+          <p>2020–2021 מגיעים מ-<em>audit-cities</em>; 2022–2023 מ-<em>local-authorities</em>. שמות שדות שונים (גיליון/גליון, שנת_הדוח/שנת_דוח) — בוצעה נורמליזציה אוטומטית.</p>
+        </div>
+      </div>
+
+      <div class="hl-item">
+        <div class="hl-icon">💰</div>
+        <div class="hl-text">
+          <strong>יחידות: אלפי שקלים</strong>
+          <p>כל הערכים באלפי ₪. ערך <strong>1,000</strong> = מיליון ש"ח. ערכים שליליים מייצגים גירעון, יתרת חובה, או הפחתה תקציבית — לא בהכרח בעיה.</p>
+        </div>
+      </div>
+
+      <div class="hl-item">
+        <div class="hl-icon">📐</div>
+        <div class="hl-text">
+          <strong>מבנה Long Format</strong>
+          <p>כל שורה = ערך אחד עבור קטגוריה + תקופה. עבור כל סעיף קיימות לרוב 2 שורות: "שנה נוכחית" ו"שנה קודמת". לניתוח השוואתי יש לעשות pivot.</p>
+        </div>
+      </div>
+
+      <div class="hl-item">
+        <div class="hl-icon">✅</div>
+        <div class="hl-text">
+          <strong>דוחות מבוקרים — אמינות גבוהה</strong>
+          <p>הנתונים עברו ביקורת חיצונית מטעם משרד הפנים. רמת האמינות גבוהה מאוד, אם כי עיכוב הפרסום מגביל ניתוח בזמן אמת.</p>
+        </div>
+      </div>
+
+      <div class="hl-item">
+        <div class="hl-icon">🔍</div>
+        <div class="hl-text">
+          <strong>שנת 2023 — אזהרת חיפוש</strong>
+          <p>בשנת 2023 הנתונים נטענים בחיפוש טקסט (q=קרית גת) ולא בפילטר מדויק. ייתכנו רשומות שוליות שאינן של קריית גת — מומלץ לאמת ידנית.</p>
+        </div>
+      </div>
+
+      <div class="hl-item">
+        <div class="hl-icon">📊</div>
+        <div class="hl-text">
+          <strong>טפסים שונים = מידע שונה</strong>
+          <p>טופס 1 = מאזן; טופס 2 = תוצאות; טופס 3 = תקציב. בחר גיליון ספציפי בפילטר לקבלת תמונה ממוקדת. השוואת טפסים שונים אינה תקינה.</p>
+        </div>
+      </div>
+
+      <!-- Dynamic highlights - filled by JS -->
+      <div class="hl-item dynamic" id="dyn1">
+        <div class="hl-icon">🏆</div>
+        <div class="hl-text">
+          <strong id="d1t">ממתין לנתונים...</strong>
+          <p id="d1p">יעודכן לאחר טעינת הנתונים</p>
+        </div>
+      </div>
+
+      <div class="hl-item dynamic" id="dyn2">
+        <div class="hl-icon">📉</div>
+        <div class="hl-text">
+          <strong id="d2t">ממתין לנתונים...</strong>
+          <p id="d2p">יעודכן לאחר טעינת הנתונים</p>
+        </div>
+      </div>
+
+      <div class="hl-item dynamic" id="dyn3">
+        <div class="hl-icon">📅</div>
+        <div class="hl-text">
+          <strong id="d3t">ממתין לנתונים...</strong>
+          <p id="d3p">יעודכן לאחר טעינת הנתונים</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════
+const YEARS = {
+  '2020':{ rid:'e23f1acb-7d89-41b6-933f-865a67bd80af', fk:'קוד_רשות', fv:'2789' },
+  '2021':{ rid:'93ec8816-eb41-43d5-bc69-12b8307a17b2', fk:'קוד_רשות', fv:'2789' },
+  '2022':{ rid:'e5ff9ad0-6db2-4660-a94e-4499fce9475d', fk:'קוד_רשות', fv:'2789' },
+  '2023':{ rid:'5825080f-905c-40f7-9f53-8ea1cf8ed394', q:'קרית גת' }
+};
+const API = 'https://data.gov.il/api/3/action/datastore_search';
+const PAGE = 25;
+const COLORS = ['#2563eb','#7c3aed','#059669','#d97706','#dc2626','#0891b2'];
+
+// State
+const cache = {};
+let year = '2020';
+let raw = [], filtered = [];
+let page = 1;
+let barInst = null, lineInst = null;
+let trendItems = [];
+
+// ═══════════════════════════════════════════════════
+// FETCH
+// ═══════════════════════════════════════════════════
+async function fetchYear(yr) {
+  if (cache[yr]) return cache[yr];
+  const cfg = YEARS[yr];
+  let records = [], offset = 0;
+  while (true) {
+    const p = new URLSearchParams({ resource_id: cfg.rid, limit: 1000, offset });
+    if (cfg.fk) p.set('filters', JSON.stringify({ [cfg.fk]: cfg.fv }));
+    else if (cfg.q) p.set('q', cfg.q);
+    const r = await fetch(`${API}?${p}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    if (!d.success) break;
+    records = records.concat(d.result.records);
+    setStatus(`טוען ${yr}... ${records.length}/${d.result.total} רשומות`, true);
+    if (records.length >= d.result.total || d.result.records.length === 0) break;
+    offset += 1000;
+  }
+  const norm = records
+    .map(r => ({
+      גיליון: (r['גיליון'] || r['גליון'] || '').trim(),
+      שורה:   (r['שורה'] || '').trim(),
+      עמודה:  (r['עמודה'] || '').trim(),
+      ערך:    parseFloat(r['ערך']) || 0,
+    }))
+    .filter(r => r.שורה); // drop empty rows
+  cache[yr] = norm;
+  return norm;
+}
+
+// ═══════════════════════════════════════════════════
+// STATUS
+// ═══════════════════════════════════════════════════
+function setStatus(txt, busy = false) {
+  document.getElementById('stext').textContent = txt;
+  document.getElementById('sdot').className = 'sdot' + (busy ? ' busy' : '');
+}
+
+// ═══════════════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════════════
+function applyFilters(data) {
+  const sh = document.getElementById('sheetSel').value;
+  const col = document.getElementById('colSel').value;
+  const q = document.getElementById('searchIn').value.trim();
+  return data.filter(r =>
+    (!sh  || r.גיליון === sh) &&
+    (!col || r.עמודה  === col) &&
+    (!q   || r.שורה.includes(q))
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// POPULATE SELECTORS
+// ═══════════════════════════════════════════════════
+function populateSheets(data) {
+  const sheets = [...new Set(data.map(r => r.גיליון).filter(Boolean))].sort();
+  const sel = document.getElementById('sheetSel');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">כל הגיליונות</option>';
+  sheets.forEach(s => {
+    const o = document.createElement('option');
+    o.value = o.textContent = s;
+    if (s === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// KPIs
+// ═══════════════════════════════════════════════════
+function updateKPIs(data) {
+  const curData = data.filter(r => r.עמודה === 'שנה נוכחית' || !r.עמודה);
+  const pos = data.filter(r => r.ערך > 0).reduce((s, r) => s + r.ערך, 0);
+  const neg = data.filter(r => r.ערך < 0).reduce((s, r) => s + r.ערך, 0);
+  const net = curData.reduce((s, r) => s + r.ערך, 0);
+  const uniq = new Set(data.map(r => r.שורה)).size;
+  document.getElementById('kTotal').textContent = fmt(data.length);
+  document.getElementById('kPos').textContent   = fmtVal(pos);
+  document.getElementById('kNeg').textContent   = fmtVal(neg);
+  const netEl = document.getElementById('kNet');
+  netEl.textContent = fmtVal(net);
+  netEl.className   = 'kpi-val ' + (net >= 0 ? 'green' : 'red');
+  document.getElementById('kUniq').textContent  = fmt(uniq);
+}
+
+// ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+const fmt = n => Math.round(n).toLocaleString('he-IL');
+const fmtVal = n => (n >= 0 ? '' : '') + fmt(n);
+const trunc = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
+
+// ═══════════════════════════════════════════════════
+// BAR CHART
+// ═══════════════════════════════════════════════════
+function updateBar(data) {
+  const col = document.getElementById('colSel').value || 'שנה נוכחית';
+  const d = data.filter(r => r.עמודה === col || !col);
+  const top = [...d].sort((a, b) => Math.abs(b.ערך) - Math.abs(a.ערך)).slice(0, 15);
+  const labels = top.map(r => trunc(r.שורה, 28));
+  const vals   = top.map(r => r.ערך);
+  const bg     = vals.map(v => v >= 0 ? 'rgba(5,150,105,.8)' : 'rgba(220,38,38,.8)');
+  const bd     = vals.map(v => v >= 0 ? '#059669' : '#dc2626');
+  document.getElementById('barYearBadge').textContent = year;
+  document.getElementById('barColBadge').textContent  = col || 'כל התקופות';
+  const ctx = document.getElementById('barC').getContext('2d');
+  if (barInst) barInst.destroy();
+  barInst = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: bg, borderColor: bd, borderWidth: 1.5, borderRadius: 5 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          title: items => top[items[0].dataIndex]?.שורה || items[0].label,
+          label: ctx => ` ${fmt(ctx.raw)} אלפי ₪`
+        }}
+      },
+      scales: {
+        x: { ticks: { callback: v => fmt(v), font: { family: 'Heebo', size: 11 } }, grid: { color: '#f1f5f9' } },
+        y: { ticks: { font: { family: 'Heebo', size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// LINE CHART (TREND)
+// ═══════════════════════════════════════════════════
+async function updateLine() {
+  if (trendItems.length === 0) {
+    const top = [...raw]
+      .filter(r => r.עמודה === 'שנה נוכחית' || !r.עמודה)
+      .sort((a, b) => Math.abs(b.ערך) - Math.abs(a.ערך))
+      .slice(0, 3).map(r => r.שורה);
+    trendItems = [...new Set(top)];
+    renderTrendBtns();
+  }
+  const years = Object.keys(YEARS);
+  const byYr = {};
+  for (const yr of years) {
+    try { byYr[yr] = cache[yr] || await fetchYear(yr); } catch { byYr[yr] = []; }
+  }
+  const datasets = trendItems.map((item, i) => ({
+    label: trunc(item, 22),
+    data: years.map(yr => {
+      const recs = (byYr[yr] || []).filter(r => r.שורה === item && (r.עמודה === 'שנה נוכחית' || !r.עמודה));
+      return recs.length ? recs[0].ערך : null;
+    }),
+    borderColor: COLORS[i % COLORS.length],
+    backgroundColor: COLORS[i % COLORS.length] + '22',
+    borderWidth: 2.5, pointRadius: 6, pointHoverRadius: 8, tension: 0.3, fill: false
+  }));
+  const ctx = document.getElementById('lineC').getContext('2d');
+  if (lineInst) lineInst.destroy();
+  lineInst = new Chart(ctx, {
+    type: 'line',
+    data: { labels: years, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Heebo', size: 11 }, padding: 10 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.raw)} אלפי ₪` } }
+      },
+      scales: {
+        y: { ticks: { callback: v => fmt(v), font: { family: 'Heebo', size: 11 } }, grid: { color: '#f1f5f9' } },
+        x: { ticks: { font: { family: 'Heebo', size: 12, weight: 'bold' } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderTrendBtns() {
+  const rows = [...new Set(raw.map(r => r.שורה))].slice(0, 25);
+  const cont = document.getElementById('trendSel');
+  cont.innerHTML = '<span class="trend-hint">בחר עד 4 סעיפים:</span>';
+  rows.forEach(row => {
+    const b = document.createElement('button');
+    b.className = 'tbtn' + (trendItems.includes(row) ? ' active' : '');
+    b.textContent = trunc(row, 20);
+    b.title = row;
+    b.onclick = () => {
+      if (trendItems.includes(row)) trendItems = trendItems.filter(x => x !== row);
+      else if (trendItems.length < 4) trendItems.push(row);
+      renderTrendBtns();
+      updateLine();
+    };
+    cont.appendChild(b);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════════════
+function updateTable(data) {
+  const start = (page - 1) * PAGE;
+  const rows = data.slice(start, start + PAGE);
+  const tbody = document.getElementById('tBody');
+  document.getElementById('tblBadge').textContent = `${fmt(data.length)} רשומות`;
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="no-data">לא נמצאו נתונים התואמים לסינון</td></tr>';
+    document.getElementById('pgn').innerHTML = '';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.גיליון || '—'}</td>
+      <td>${r.שורה || '—'}</td>
+      <td>${r.עמודה || '—'}</td>
+      <td style="text-align:left" class="${r.ערך >= 0 ? 'val-pos' : 'val-neg'}">${fmt(r.ערך)}</td>
+    </tr>`).join('');
+  renderPagination(data.length);
+}
+
+function renderPagination(total) {
+  const tp = Math.ceil(total / PAGE);
+  const c = document.getElementById('pgn');
+  if (tp <= 1) { c.innerHTML = ''; return; }
+  let h = '';
+  if (page > 1) h += `<button class="pbtn" onclick="goPage(${page-1})">→</button>`;
+  const s = Math.max(1, page - 2), e = Math.min(tp, s + 4);
+  for (let i = s; i <= e; i++) h += `<button class="pbtn${i===page?' active':''}" onclick="goPage(${i})">${i}</button>`;
+  if (page < tp) h += `<button class="pbtn" onclick="goPage(${page+1})">←</button>`;
+  h += `<span class="pinfo">עמוד ${page} / ${tp}</span>`;
+  c.innerHTML = h;
+}
+
+function goPage(p) { page = p; updateTable(filtered); }
+
+// ═══════════════════════════════════════════════════
+// DYNAMIC HIGHLIGHTS
+// ═══════════════════════════════════════════════════
+function updateHighlights(data) {
+  const cur = data.filter(r => r.עמודה === 'שנה נוכחית' || !r.עמודה);
+  if (!cur.length) return;
+
+  // Top item
+  const top = [...cur].sort((a, b) => Math.abs(b.ערך) - Math.abs(a.ערך))[0];
+  document.getElementById('d1t').textContent = `סעיף דומיננטי ב-${year}`;
+  document.getElementById('d1p').textContent =
+    `"${trunc(top.שורה, 50)}" — ערך: ${fmt(top.ערך)} אלפי ₪ (${top.גיליון || 'ללא טופס'})`;
+
+  // Negative ratio
+  const neg = cur.filter(r => r.ערך < 0).length;
+  const pct = Math.round((neg / cur.length) * 100);
+  document.getElementById('d2t').textContent = `ניתוח ערכים שליליים — ${year}`;
+  document.getElementById('d2p').textContent =
+    `${fmt(neg)} סעיפים מתוך ${fmt(cur.length)} (${pct}%) מציגים ערכים שליליים. ` +
+    (pct > 30 ? 'שיעור גבוה — מעיד על גירעונות או יתרות חובה משמעותיות.' : 'שיעור תקין יחסית.');
+
+  // Count sheets
+  const sheets = new Set(data.map(r => r.גיליון).filter(Boolean));
+  document.getElementById('d3t').textContent = `נתוני ${year} — סיכום כללי`;
+  document.getElementById('d3p').textContent =
+    `${fmt(data.length)} רשומות ב-${sheets.size} גיליונות שונים. ` +
+    `${fmt(new Set(data.map(r => r.שורה)).size)} סעיפים ייחודיים. ` +
+    `סה"כ חיובי: ${fmt(cur.filter(r=>r.ערך>0).reduce((s,r)=>s+r.ערך,0))} אלפי ₪.`;
+}
+
+// ═══════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════
+function exportCSV() {
+  if (!filtered.length) { alert('אין נתונים לייצוא'); return; }
+  const bom = '\uFEFF';
+  const hdr = 'גיליון,שורה,עמודה,ערך (אלפי ₪)\n';
+  const body = filtered.map(r =>
+    `"${r.גיליון}","${r.שורה}","${r.עמודה}",${r.ערך}`
+  ).join('\n');
+  const blob = new Blob([bom + hdr + body], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `kiryat-gat-budget-${year}.csv`;
+  a.click();
+}
+
+function copyAPIUrl() {
+  const cfg = YEARS[year];
+  let url = `${API}?resource_id=${cfg.rid}&limit=1000`;
+  if (cfg.fk) url += `&filters={"${cfg.fk}":"${cfg.fv}"}`;
+  else if (cfg.q) url += `&q=${cfg.q}`;
+  navigator.clipboard.writeText(url).then(() => alert('כתובת ה-API הועתקה ✓'));
+}
+
+// ═══════════════════════════════════════════════════
+// MAIN RENDER
+// ═══════════════════════════════════════════════════
+function render() {
+  filtered = applyFilters(raw);
+  page = 1;
+  updateKPIs(filtered);
+  updateBar(filtered);
+  updateTable(filtered);
+  updateHighlights(filtered);
+}
+
+async function load(yr) {
+  year = yr;
+  setStatus(`טוען נתוני ${yr}...`, true);
+  document.querySelectorAll('select,input').forEach(e => e.disabled = true);
+  document.getElementById('tBody').innerHTML =
+    '<tr><td colspan="4"><div class="loading-state"><div class="spinner"></div><span>טוען נתונים מ-data.gov.il...</span></div></td></tr>';
+  try {
+    raw = await fetchYear(yr);
+    populateSheets(raw);
+    document.querySelectorAll('select,input').forEach(e => e.disabled = false);
+    render();
+    trendItems = [];
+    renderTrendBtns();
+    updateLine();
+    setStatus(`נטענו ${fmt(raw.length)} רשומות — שנת ${yr}`, false);
+  } catch (e) {
+    setStatus(`שגיאה: ${e.message}`, false);
+    document.getElementById('tBody').innerHTML =
+      `<tr><td colspan="4" class="no-data">שגיאה בטעינה: ${e.message}</td></tr>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════
+document.querySelectorAll('.ytab').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.ytab').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  load(b.dataset.year);
+}));
+
+let debounce;
+document.getElementById('searchIn').addEventListener('input', () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(render, 280);
+});
+document.getElementById('sheetSel').addEventListener('change', render);
+document.getElementById('colSel').addEventListener('change', render);
+
+// Boot
+load('2020');
+</script>
+</body>
+</html>
