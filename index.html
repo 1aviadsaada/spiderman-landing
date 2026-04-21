@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spider-Man</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;700&family=Playfair+Display:wght@700;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #c0392b;
+      --dark-red: #7b241c;
+      --blue: #1a3a6b;
+      --dark-blue: #0d1f3c;
+      --accent: #e74c3c;
+      --gold: #f39c12;
+    }
+
+    body {
+      font-family: 'Oswald', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ─── WEB SVG BACKGROUND ─── */
+    .web-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.07;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 60px, #c0392b 61px, #c0392b 62px, transparent 63px),
+        radial-gradient(circle at 50% 50%, transparent 120px, #c0392b 121px, #c0392b 122px, transparent 123px),
+        radial-gradient(circle at 50% 50%, transparent 180px, #c0392b 181px, #c0392b 182px, transparent 183px),
+        radial-gradient(circle at 50% 50%, transparent 240px, #c0392b 241px, #c0392b 242px, transparent 243px),
+        radial-gradient(circle at 50% 50%, transparent 300px, #c0392b 301px, #c0392b 302px, transparent 303px),
+        radial-gradient(circle at 50% 50%, transparent 400px, #c0392b 401px, #c0392b 402px, transparent 403px);
+      background-size: 600px 600px;
+      background-position: center;
+    }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 3rem;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid var(--red);
+    }
+
+    .nav-logo {
+      font-family: 'Bangers', cursive;
+      font-size: 2rem;
+      letter-spacing: 3px;
+      color: var(--red);
+      text-shadow: 0 0 20px rgba(192,57,43,0.7);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #ddd;
+      text-decoration: none;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      transition: color 0.3s;
+      text-transform: uppercase;
+    }
+
+    .nav-links a:hover { color: var(--red); }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0d1f3c 0%, #1a0505 50%, #0a0a0a 100%);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cline x1='100' y1='100' x2='100' y2='0' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3Cline x1='100' y1='100' x2='187' y2='50' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3Cline x1='100' y1='100' x2='187' y2='150' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3Cline x1='100' y1='100' x2='100' y2='200' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3Cline x1='100' y1='100' x2='13' y2='150' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3Cline x1='100' y1='100' x2='13' y2='50' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3Ccircle cx='100' cy='100' r='30' fill='none' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3Ccircle cx='100' cy='100' r='60' fill='none' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3Ccircle cx='100' cy='100' r='90' fill='none' stroke='%23c0392b' stroke-width='0.5' opacity='0.3'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      opacity: 0.4;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .spider-logo {
+      font-size: 9rem;
+      line-height: 1;
+      animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(192,57,43,0.8));
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .hero-title {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(4rem, 12vw, 9rem);
+      letter-spacing: 8px;
+      line-height: 0.9;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #fff 0%, var(--red) 60%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 4px 20px rgba(192,57,43,0.6));
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      color: #aaa;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-quote {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      color: var(--gold);
+      font-style: italic;
+      margin-bottom: 2.5rem;
+      text-shadow: 0 0 15px rgba(243,156,18,0.5);
+    }
+
+    .cta-btn {
+      display: inline-block;
+      padding: 1rem 3rem;
+      background: var(--red);
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Bangers', cursive;
+      font-size: 1.4rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: all 0.3s;
+      box-shadow: 0 0 30px rgba(192,57,43,0.5);
+      border: 2px solid transparent;
+    }
+
+    .cta-btn:hover {
+      background: transparent;
+      border-color: var(--red);
+      color: var(--red);
+      transform: scale(1.05);
+      box-shadow: 0 0 50px rgba(192,57,43,0.8);
+    }
+
+    /* ─── WEB SWING ANIMATION ─── */
+    .web-line {
+      position: absolute;
+      top: 0;
+      width: 2px;
+      background: linear-gradient(180deg, rgba(192,57,43,0.8) 0%, transparent 100%);
+      animation: webSwing 4s ease-in-out infinite;
+      transform-origin: top center;
+    }
+
+    .web-line:nth-child(1) { left: 20%; height: 200px; animation-delay: 0s; }
+    .web-line:nth-child(2) { left: 50%; height: 150px; animation-delay: 1s; }
+    .web-line:nth-child(3) { left: 80%; height: 180px; animation-delay: 2s; }
+
+    @keyframes webSwing {
+      0%, 100% { transform: rotate(-15deg) scaleY(1); }
+      50% { transform: rotate(15deg) scaleY(1.2); }
+    }
+
+    /* ─── STATS SECTION ─── */
+    .stats {
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(90deg, var(--dark-blue), var(--dark-red));
+      padding: 4rem 2rem;
+      border-top: 3px solid var(--red);
+      border-bottom: 3px solid var(--red);
+    }
+
+    .stats-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'Bangers', cursive;
+      font-size: 4rem;
+      color: var(--red);
+      text-shadow: 0 0 20px rgba(192,57,43,0.7);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #aaa;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 0.3rem;
+    }
+
+    /* ─── POWERS SECTION ─── */
+    .powers {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 2rem;
+      background: #0a0a0a;
+    }
+
+    .section-title {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      text-align: center;
+      letter-spacing: 5px;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .section-title span { color: var(--red); }
+
+    .section-divider {
+      width: 80px;
+      height: 3px;
+      background: var(--red);
+      margin: 0 auto 3.5rem;
+      box-shadow: 0 0 15px rgba(192,57,43,0.7);
+    }
+
+    .powers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .power-card {
+      background: linear-gradient(145deg, #111, #1a0a0a);
+      border: 1px solid #2a0e0e;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .power-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(192,57,43,0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .power-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--red);
+      box-shadow: 0 10px 40px rgba(192,57,43,0.3);
+    }
+
+    .power-card:hover::before { opacity: 1; }
+
+    .power-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .power-title {
+      font-family: 'Bangers', cursive;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      color: var(--red);
+      margin-bottom: 0.7rem;
+    }
+
+    .power-desc {
+      color: #999;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    /* ─── VILLAINS ─── */
+    .villains {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 2rem;
+      background: linear-gradient(180deg, #0a0a0a 0%, #0d1117 100%);
+    }
+
+    .villains-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .villain-tag {
+      padding: 0.6rem 1.5rem;
+      border: 1px solid #333;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      color: #ccc;
+      transition: all 0.3s;
+      cursor: default;
+    }
+
+    .villain-tag:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(192,57,43,0.1);
+      box-shadow: 0 0 15px rgba(192,57,43,0.3);
+    }
+
+    /* ─── QUOTE SECTION ─── */
+    .quote-section {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 2rem;
+      background: linear-gradient(135deg, #1a4a1a 0%, #0d2e0d 50%, #0a1f0a 100%);
+      text-align: center;
+      border-top: 3px solid #2ecc71;
+      border-bottom: 3px solid #2ecc71;
+    }
+
+    .quote-section::before {
+      content: '\201C';
+      position: absolute;
+      top: -1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Playfair Display', serif;
+      font-size: 12rem;
+      color: rgba(46,204,113,0.12);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .big-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4.5vw, 3.8rem);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 1px;
+      line-height: 1.4;
+      color: #fff;
+      max-width: 860px;
+      margin: 0 auto 1.8rem;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.6);
+    }
+
+    .quote-author {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      color: #2ecc71;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(46,204,113,0.5);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: relative;
+      z-index: 1;
+      background: #050505;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid #1a1a1a;
+      color: #555;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    footer span { color: var(--red); }
+
+    /* ─── SCROLL ANIMATIONS ─── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── SPIDER CRAWL ─── */
+    .spider-crawl {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      font-size: 2.5rem;
+      animation: crawl 6s linear infinite;
+      filter: drop-shadow(0 0 10px rgba(192,57,43,0.8));
+      cursor: pointer;
+    }
+
+    @keyframes crawl {
+      0%   { left: -5%; transform: translateX(0) scaleX(1); }
+      49%  { left: 105%; transform: translateX(-100%) scaleX(1); }
+      50%  { left: 105%; transform: translateX(-100%) scaleX(-1); }
+      99%  { left: -5%; transform: translateX(0) scaleX(-1); }
+      100% { left: -5%; transform: translateX(0) scaleX(1); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="web-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">🕷 Spider-Man</div>
+  <ul class="nav-links">
+    <li><a href="#powers">כוחות</a></li>
+    <li><a href="#villains">אויבים</a></li>
+    <li><a href="#quote">ציטוט</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="web-line"></div>
+  <div class="web-line"></div>
+  <div class="web-line"></div>
+
+  <div class="hero-content">
+    <div class="spider-logo">🕷️</div>
+    <h1 class="hero-title">Spider-Man</h1>
+    <p class="hero-subtitle">Your Friendly Neighborhood Hero</p>
+    <p class="hero-quote">"עם כוח גדול באה אחריות גדולה"</p>
+    <a href="#powers" class="cta-btn">גלה את הכוחות</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat-item fade-in">
+      <div class="stat-number">700+</div>
+      <div class="stat-label">קרבות ניצחון</div>
+    </div>
+    <div class="stat-item fade-in">
+      <div class="stat-number">60+</div>
+      <div class="stat-label">שנות גיבורות</div>
+    </div>
+    <div class="stat-item fade-in">
+      <div class="stat-number">∞</div>
+      <div class="stat-label">חיים שהוצלו</div>
+    </div>
+    <div class="stat-item fade-in">
+      <div class="stat-number">#1</div>
+      <div class="stat-label">גיבור ניו יורק</div>
+    </div>
+  </div>
+</section>
+
+<!-- POWERS -->
+<section class="powers" id="powers">
+  <h2 class="section-title fade-in">ה<span>כוחות</span> שלי</h2>
+  <div class="section-divider fade-in"></div>
+
+  <div class="powers-grid">
+    <div class="power-card fade-in">
+      <div class="power-icon">🕸️</div>
+      <div class="power-title">ירי קורי עכביש</div>
+      <p class="power-desc">יכולת לירות קורי עכביש חזקים מהפרקים — לנדנד בין בניינים, לכפות אויבים, ולנע במהירות בעיר.</p>
+    </div>
+    <div class="power-card fade-in">
+      <div class="power-icon">⚡</div>
+      <div class="power-title">חישת עכביש</div>
+      <p class="power-desc">תחושה מסתורית שמזהירה מפני סכנה שניות לפני שהיא מתרחשת — הגנה בלתי ניתנת לחדירה.</p>
+    </div>
+    <div class="power-card fade-in">
+      <div class="power-icon">💪</div>
+      <div class="power-title">כוח-על</div>
+      <p class="power-desc">כוח פיזי הגדול פי 10 מאדם רגיל — מסוגל להרים מכוניות ולהפיל מבנים שלמים.</p>
+    </div>
+    <div class="power-card fade-in">
+      <div class="power-icon">🧗</div>
+      <div class="power-title">הטיפוס על קירות</div>
+      <p class="power-desc">ידיים ורגליים הנדבקות לכל משטח — זכוכית, מתכת, בטון — ללא מאמץ.</p>
+    </div>
+    <div class="power-card fade-in">
+      <div class="power-icon">🧠</div>
+      <div class="power-title">גאון מדעי</div>
+      <p class="power-desc">אינטליגנציה יוצאת דופן — המציא את מנגנון ירי הקורים, את החליפה ועוד עשרות המצאות.</p>
+    </div>
+    <div class="power-card fade-in">
+      <div class="power-icon">🏃</div>
+      <div class="power-title">זריזות-על</div>
+      <p class="power-desc">רפלקסים וזריזות הרבה מעל לגבולות האנושי — מתחמק ממהירות כדורים בקלות.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VILLAINS -->
+<section class="villains" id="villains">
+  <h2 class="section-title fade-in">ה<span>אויבים</span> שנוצחו</h2>
+  <div class="section-divider fade-in"></div>
+
+  <div class="villains-list fade-in">
+    <span class="villain-tag">Green Goblin</span>
+    <span class="villain-tag">Doctor Octopus</span>
+    <span class="villain-tag">Venom</span>
+    <span class="villain-tag">Sandman</span>
+    <span class="villain-tag">Electro</span>
+    <span class="villain-tag">Rhino</span>
+    <span class="villain-tag">Vulture</span>
+    <span class="villain-tag">Mysterio</span>
+    <span class="villain-tag">Scorpion</span>
+    <span class="villain-tag">Lizard</span>
+    <span class="villain-tag">Carnage</span>
+    <span class="villain-tag">Kraven</span>
+  </div>
+</section>
+
+<!-- BIG QUOTE -->
+<section class="quote-section" id="quote">
+  <div class="big-quote fade-in">
+    "עם כוח גדול<br/>באה אחריות גדולה"
+  </div>
+  <p class="quote-author fade-in">— Ben Parker, דוד של פיטר פארקר</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>🕷 <span>Spider-Man</span> — המגן של ניו יורק &nbsp;|&nbsp; Peter Parker &copy; 2024</p>
+</footer>
+
+<!-- SPIDER CRAWL -->
+<div class="spider-crawl" title="Friendly neighborhood Spider-Man!">🕷️</div>
+
+<script>
+  // Scroll fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Navbar hide/show
+  let lastY = 0;
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    if (window.scrollY > lastY && window.scrollY > 100) {
+      nav.style.transform = 'translateY(-100%)';
+    } else {
+      nav.style.transform = 'translateY(0)';
+    }
+    lastY = window.scrollY;
+    nav.style.transition = 'transform 0.3s ease';
+  });
+</script>
+
+</body>
+</html>
